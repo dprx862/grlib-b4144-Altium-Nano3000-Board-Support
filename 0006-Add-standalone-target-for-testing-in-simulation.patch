@@ -1,0 +1,46 @@
+From 14809e4fd58fc900256d8f4630dd9bb1f434b434 Mon Sep 17 00:00:00 2001
+From: Martin Wilson <mrw@trimetix.co.uk>
+Date: Thu, 21 Aug 2014 10:33:30 +0100
+Subject: [PATCH 6/7] Add standalone target for testing in simulation
+
+Signed-off-by: Martin Wilson <mrw@trimetix.co.uk>
+---
+ grlib-gpl-1.3.7-b4144/software/leon3/Makefile | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/grlib-gpl-1.3.7-b4144/software/leon3/Makefile b/grlib-gpl-1.3.7-b4144/software/leon3/Makefile
+index d2089cc..a535282 100644
+--- a/grlib-gpl-1.3.7-b4144/software/leon3/Makefile
++++ b/grlib-gpl-1.3.7-b4144/software/leon3/Makefile
+@@ -62,7 +62,7 @@ cgtest.o : cgtest.c
+ lib3tests.a: $(OFILES)
+ 	$(XAR) -cr lib3tests.a $(OFILES)
+ 
+-soft: prom.srec ram.srec $(EXTRA_SOFT)
++soft: prom.srec sdram.srec ram.srec $(EXTRA_SOFT)
+ 
+ prom.o: prom.S prom.h
+ 	$(XAS) $<
+@@ -75,6 +75,8 @@ prom.srec: prom.exe
+ systest.exe: systest.c lib3tests.a
+ 	$(XCC) $(XCFLAGS) systest.c $(XLDFLAGS) -o systest.exe
+ 
++sdram.srec: standalone.exe
++	sparc-elf-objcopy -O srec standalone.exe sdram.srec
+ ram.srec: systest.exe
+ 	sparc-elf-objcopy -O srec --gap-fill 0 systest.exe ram.srec
+ 
+@@ -83,6 +85,10 @@ soft-clean:
+ 
+ mmusoft:
+ 	make -f Makefile.img mmusoft
++prom.dbo: prom.exe
++	sparc-elf-objdump -S prom.exe >prom.dbo
++standalone.dbo: standalone.exe
++	sparc-elf-objdump -S standalone.exe >standalone.dbo
+ 
+ standalone.exe: systest.c standalone.c lib3tests.a
+ 	$(XCC) $(XCFLAGS) systest.c $(VPATH)/standalone.c $(XLDFLAGS) -o standalone.exe
+-- 
+1.8.5.3
+
